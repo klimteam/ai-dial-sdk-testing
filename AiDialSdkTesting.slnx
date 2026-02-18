@@ -1,0 +1,6 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/AiDialSdk.Testing.NUnit/AiDialSdk.Testing.NUnit.csproj" />
+    <Project Path="src/AiDialSdk.Testing/AiDialSdk.Testing.csproj" />
+  </Folder>
+</Solution>

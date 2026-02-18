@@ -1,0 +1,32 @@
+﻿<Project Sdk="Microsoft.NET.Sdk">
+
+    <PropertyGroup>
+        <TargetFramework>net10.0</TargetFramework>
+        <ImplicitUsings>enable</ImplicitUsings>
+        <Nullable>enable</Nullable>
+
+        <PackageId>AiDialSdk.Testing.NUnit</PackageId>
+        <Version>0.0.1-alpha.1</Version>
+        <Authors>KlimTeam</Authors>
+        <Description>Testing utilities for DIAL platform</Description>
+        <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
+        <PackageReadmeFile>README.md</PackageReadmeFile>
+
+        <PackageProjectUrl>https://github.com/klimteam/ai-dial-sdk-testing</PackageProjectUrl>
+        <RepositoryUrl>https://github.com/klimteam/ai-dial-sdk-testing</RepositoryUrl>
+        <RepositoryType>git</RepositoryType>
+    </PropertyGroup>
+
+    <ItemGroup>
+        <None Include="..\..\README.md" Pack="true" PackagePath="\" />
+    </ItemGroup>
+    
+    <ItemGroup>
+        <PackageReference Include="NUnit" Version="4.5.0" />
+    </ItemGroup>
+
+    <ItemGroup>
+      <ProjectReference Include="..\AiDialSdk.Testing\AiDialSdk.Testing.csproj" />
+    </ItemGroup>
+    
+</Project>
