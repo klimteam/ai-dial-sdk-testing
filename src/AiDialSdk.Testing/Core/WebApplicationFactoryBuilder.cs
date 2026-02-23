@@ -12,18 +12,23 @@ public class WebApplicationFactoryBuilder<TEntryPoint> : WebApplicationFactoryBu
     where TEntryPoint : class
 {
     private readonly Action<IWebHostBuilder> _webHostBuilder;
+    private readonly int? _port;
 
-    public WebApplicationFactoryBuilder(Action<IWebHostBuilder> webHostBuilder)
+    public WebApplicationFactoryBuilder(Action<IWebHostBuilder> webHostBuilder, int? port)
     {
         _webHostBuilder = webHostBuilder;
+        _port = port;
     }
     
     public override IWebApplicationFactory Build()
     {
         var factory = new WebApplicationFactory<TEntryPoint>();
         
-        var delegatedFactory = factory.WithWebHostBuilder(_webHostBuilder); 
-        delegatedFactory.UseKestrel();
+        var delegatedFactory = factory.WithWebHostBuilder(_webHostBuilder);
+        if (_port.HasValue)
+            delegatedFactory.UseKestrel(_port.Value);
+        else
+            delegatedFactory.UseKestrel();
         
         return new WebApplicationFactoryWrapper<TEntryPoint>(factory, delegatedFactory);
     }

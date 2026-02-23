@@ -19,10 +19,10 @@ public class LlmTestDefinitionBuilder
         _chatClient = new DialChatApiClient(new HttpClient(), new Uri(endpoint), apiKey, deploymentName, null);
     }
     
-    public LlmTestDefinitionBuilder WithWebApplication<TEntryPoint>(Action<IWebHostBuilder> webHostBuilder) 
+    public LlmTestDefinitionBuilder WithWebApplication<TEntryPoint>(Action<IWebHostBuilder> webHostBuilder, int? port)
         where TEntryPoint : class
     {
-        _webApplicationFactoryBuilders.Add(new WebApplicationFactoryBuilder<TEntryPoint>(webHostBuilder));
+        _webApplicationFactoryBuilders.Add(new WebApplicationFactoryBuilder<TEntryPoint>(webHostBuilder, port));
         return this;
     }
 
