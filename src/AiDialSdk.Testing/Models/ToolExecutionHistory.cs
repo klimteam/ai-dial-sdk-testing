@@ -4,13 +4,15 @@ namespace AiDialSdk.Testing.Models;
 
 public class ToolExecutionHistory
 {
-    public ToolExecutionHistory(ToolCall toolCall, ToolMessage toolExecutionResult)
+    public ToolExecutionHistory()
     {
-        ToolCall = toolCall;
-        ToolExecutionResult = toolExecutionResult;
+        Messages = [];
     }
-        
-    public ToolCall ToolCall { get; }
     
-    public ToolMessage ToolExecutionResult { get; }
+    public ToolExecutionHistory(IReadOnlyList<BaseMessage> messages)
+    {
+        Messages = messages;
+    }
+
+    public IReadOnlyList<BaseMessage> Messages { get; }
 }

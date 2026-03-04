@@ -2,9 +2,9 @@ using AiDialSdk.Api.OpenAi.Data;
 
 namespace AiDialSdk.Testing.TestStrategies.Models;
 
-public class TestStrategyResult
+public class TestResult
 {
-    public TestStrategyResult(IReadOnlyList<BaseMessage> messages, IReadOnlyList<string> completeReasons, Usage? dialUsage)
+    public TestResult(IReadOnlyList<BaseMessage> messages, IReadOnlyList<string> completeReasons, Usage? dialUsage)
     {
         Messages = messages;
         CompleteReasons = completeReasons;

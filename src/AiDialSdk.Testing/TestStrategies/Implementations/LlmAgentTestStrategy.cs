@@ -33,7 +33,7 @@ public class LlmAgentTestStrategy : BaseTestStrategy<LlmAgentTestStrategyExecuti
         _maxIterations = maxIterations;
     }
     
-    public async Task<TestStrategyResult> RunAsync(IDialChatApiClient chatClient, CancellationToken token)
+    public async Task<TestResult> RunAsync(IDialChatApiClient chatClient, CancellationToken token)
     {
         var testExecutionContext = new LlmAgentTestStrategyExecutionContext(_prompt);
         var agentChatClient = GetChatClient();
@@ -87,7 +87,7 @@ public class LlmAgentTestStrategy : BaseTestStrategy<LlmAgentTestStrategyExecuti
             }
         }
 
-        return new LlmAgentTestStrategyResult(
+        return new LlmAgentTestResult(
             testExecutionContext.Messages,
             testExecutionContext.CompleteReasons,
             testExecutionContext.DialUsage,

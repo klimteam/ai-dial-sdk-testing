@@ -20,7 +20,7 @@ public class LlmTestDefinition
         _webApplicationFactoryBuilders = webApplicationFactoryBuilders;
     }
 
-    public async Task<TestStrategyResult> RunAsync(CancellationToken token = default)
+    public async Task<TestResult> RunAsync(CancellationToken token = default)
     {
         var webApplications = BuildWebApplicationFactories();
         await StartWebApplicationsAsync(webApplications);

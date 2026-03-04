@@ -8,10 +8,10 @@ public abstract class BaseTestStrategyBuilder<TContext> where TContext : TestStr
     protected readonly List<CompletionCondition> CompletionConditions = [];
     protected readonly List<ChatActionCondition<LlmAgentTestStrategyExecutionContext>> ChatActionConditions = [];
     
-    protected void WithToolCallCompletionInternal(string toolName)
+    protected void WithToolCallByQuickAppCompletionInternal(string quickApp, string toolName)
     {
         CompletionConditions.Add(new CompletionCondition(
-            context => context.LastDialAssistantMessageOrDefault()?.ToolWasCalledByQuickApp(toolName) ?? false, 
+            context => context.LastDialAssistantMessageOrDefault()?.ToolWasCalledByQuickApp(quickApp, toolName) ?? false, 
             $"Tool '{toolName}' was called in the last assistant message"));
     }
     

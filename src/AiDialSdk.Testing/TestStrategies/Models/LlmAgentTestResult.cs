@@ -3,9 +3,9 @@ using Microsoft.Extensions.AI;
 
 namespace AiDialSdk.Testing.TestStrategies.Models;
 
-public class LlmAgentTestStrategyResult : TestStrategyResult
+public class LlmAgentTestResult : TestResult
 {
-    public LlmAgentTestStrategyResult(
+    public LlmAgentTestResult(
         IReadOnlyList<BaseMessage> messages, 
         IReadOnlyList<string> completeReasons, 
         Usage? dialUsage,

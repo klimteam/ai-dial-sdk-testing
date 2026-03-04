@@ -47,9 +47,9 @@ public class LlmAgentTestStrategyBuilder : BaseTestStrategyBuilder<LlmAgentTestS
         return this;
     }
     
-    public LlmAgentTestStrategyBuilder CompletedWithToolCall(string toolName)
+    public LlmAgentTestStrategyBuilder CompletedWithToolCallByQuickApp(string quickAppName, string toolName)
     {
-        WithToolCallCompletionInternal(toolName);
+        WithToolCallByQuickAppCompletionInternal(quickAppName, toolName);
         return this;
     }
     

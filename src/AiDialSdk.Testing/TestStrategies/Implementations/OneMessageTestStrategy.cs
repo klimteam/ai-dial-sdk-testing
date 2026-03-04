@@ -14,13 +14,13 @@ public class OneMessageTestStrategy : ITestStrategy
         _message = message;
     }
 
-    public async Task<TestStrategyResult> RunAsync(IDialChatApiClient chatClient, CancellationToken token)
+    public async Task<TestResult> RunAsync(IDialChatApiClient chatClient, CancellationToken token)
     {
         var chatHistory = new List<BaseMessage> { new UserMessage(_message) };
         var chatResponse = await chatClient.CompleteChatAsync(chatHistory, new DialChatOptions(), token);
         
         chatHistory.Add(chatResponse.Message);
-        return new TestStrategyResult(
+        return new TestResult(
             chatHistory,
             ["Completed after one message."], 
             chatResponse.Usage ?? new Usage(0,0,0));
