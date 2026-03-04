@@ -24,7 +24,13 @@ public class WebApplicationFactoryBuilder<TEntryPoint> : WebApplicationFactoryBu
     {
         var factory = new WebApplicationFactory<TEntryPoint>();
         
+        if (_port.HasValue)
+            factory.UseKestrel(_port.Value);
+        else
+            factory.UseKestrel();
+        
         var delegatedFactory = factory.WithWebHostBuilder(_webHostBuilder);
+        
         if (_port.HasValue)
             delegatedFactory.UseKestrel(_port.Value);
         else
