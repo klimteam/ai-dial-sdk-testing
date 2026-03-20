@@ -6,12 +6,20 @@
         <Nullable>enable</Nullable>
 
         <PackageId>AiDialSdk.Testing</PackageId>
-        <Version>0.0.1-alpha.2</Version>
+        <Version>0.0.1-alpha.3</Version>
         <Authors>KlimTeam</Authors>
         <Description>Testing utilities for DIAL platform</Description>
         <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
         <PackageReadmeFile>README.md</PackageReadmeFile>
 
+        <GeneratePackageOnBuild>true</GeneratePackageOnBuild>
+
+        <DebugType>portable</DebugType>
+        <DebugSymbols>true</DebugSymbols>
+
+        <IncludeSymbols>true</IncludeSymbols>
+        <SymbolPackageFormat>snupkg</SymbolPackageFormat>
+        
         <PackageProjectUrl>https://github.com/klimteam/ai-dial-sdk-testing</PackageProjectUrl>
         <RepositoryUrl>https://github.com/klimteam/ai-dial-sdk-testing</RepositoryUrl>
         <RepositoryType>git</RepositoryType>
@@ -22,7 +30,7 @@
     </ItemGroup>
     
     <ItemGroup>
-        <PackageReference Include="AiDialSdk.Api" Version="0.0.1-alpha.1" />
+        <PackageReference Include="AiDialSdk.Api" Version="0.0.1-alpha.2" />
         <PackageReference Include="Azure.AI.OpenAI" Version="2.8.0-beta.1" />
         <PackageReference Include="Microsoft.AspNetCore.Mvc.Testing" Version="10.0.3" />
         <PackageReference Include="Microsoft.Extensions.AI.OpenAI" Version="10.3.0" />
