@@ -1,22 +1,33 @@
-using AiDialSdk.Api.Chat;
 using AiDialSdk.Api.Chat.Implementations;
 using AiDialSdk.Testing.TestStrategies;
 using AiDialSdk.Testing.TestStrategies.Builders;
 using Microsoft.AspNetCore.Hosting;
+using Microsoft.Extensions.Configuration;
 
 namespace AiDialSdk.Testing.Core;
 
 public class LlmTestDefinitionBuilder
 {
-    private readonly List<WebApplicationFactoryBuilder> _webApplicationFactoryBuilders = [];
+    private const string LlmTestDefinitionConfigurationKey = "LlmTestDefinitionConfiguration";
     
-    private readonly IDialChatApiClient _chatClient;
-
+    internal const string EndpointConfigurationKey = $"{LlmTestDefinitionConfigurationKey}:Endpoint";
+    internal const string ApiKeyConfigurationKey = $"{LlmTestDefinitionConfigurationKey}:ApiKey";
+    
+    private readonly string _deploymentName;
+    private readonly string? _endpoint;
+    private readonly string? _apiKey;
+    
+    private readonly IConfiguration _configuration;
+    
+    private readonly List<WebApplicationFactoryBuilder> _webApplicationFactoryBuilders = [];
     private ITestStrategy? _testStrategy;
     
-    public LlmTestDefinitionBuilder(string deploymentName, string endpoint, string apiKey)
+    public LlmTestDefinitionBuilder(string deploymentName, string? endpoint = null, string? apiKey = null)
     {
-        _chatClient = new DialChatApiClient(new HttpClient(), new Uri(endpoint), apiKey, deploymentName, null);
+        _deploymentName = deploymentName;
+        _endpoint = endpoint;
+        _apiKey = apiKey;
+        _configuration = BuildConfiguration();
     }
     
     public LlmTestDefinitionBuilder WithWebApplication<TEntryPoint>(Action<IWebHostBuilder> webHostBuilder, int? port)
@@ -31,7 +42,7 @@ public class LlmTestDefinitionBuilder
         if (_testStrategy != null)
             throw new InvalidOperationException("Test strategy is already configured.");
         
-        var builder = new LlmAgentTestStrategyBuilder();
+        var builder = new LlmAgentTestStrategyBuilder(_configuration);
         configure(builder);
         _testStrategy = builder.Build();
         return this;
@@ -48,11 +59,50 @@ public class LlmTestDefinitionBuilder
         return this;
     }
     
+    public LlmTestDefinitionBuilder WithMessageSequenceTestStrategy(Action<MessageSequenceTestStrategyBuilder> configure)
+    {
+        if (_testStrategy != null)
+            throw new InvalidOperationException("Test strategy is already configured.");
+        
+        var builder = new MessageSequenceTestStrategyBuilder();
+        configure(builder);
+        _testStrategy = builder.Build();
+        return this;
+    }
+    
     public LlmTestDefinition Build()
     {
-        if (_testStrategy is null)
-            throw new InvalidOperationException("Test strategy is not configured.");
+        var chatClient = BuildChatClient();
         
-        return new LlmTestDefinition(_chatClient, _testStrategy, _webApplicationFactoryBuilders);
+        return _testStrategy is null 
+            ? throw new InvalidOperationException("Test strategy is not configured.") 
+            : new LlmTestDefinition(chatClient, _testStrategy, _webApplicationFactoryBuilders);
+    }
+
+    private DialChatApiClient BuildChatClient()
+    {
+        return new DialChatApiClient(new HttpClient(), new Uri(GetEndpoint()), GetApiKey(), _deploymentName, null);
+    }
+    
+    private static IConfiguration BuildConfiguration()
+    {
+        return new ConfigurationBuilder()
+            .AddJsonFile("appsettings.json", optional: true)
+            .AddEnvironmentVariables()
+            .Build();
+    }
+    
+    private string GetEndpoint()
+    {
+        var endpoint = _configuration.GetValue<string>(EndpointConfigurationKey);
+        return endpoint ?? _endpoint ?? throw new InvalidOperationException(
+            $"Endpoint must be provided either through configuration key '{EndpointConfigurationKey}' or constructor parameter.");
+    }
+
+    private string GetApiKey()
+    {
+        var apiKey = _configuration.GetValue<string>(ApiKeyConfigurationKey);
+        return apiKey ?? _apiKey ?? throw new InvalidOperationException(
+            $"API key must be provided either through configuration key '{ApiKeyConfigurationKey}' or constructor parameter.");
     }
 }
