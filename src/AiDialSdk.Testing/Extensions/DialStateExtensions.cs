@@ -11,9 +11,7 @@ public static class DialStateExtensions
     
     public static IReadOnlyList<BaseMessage> GetToolExecutionHistory(this DialState state)
     {
-        var toolExecutionHistory = state[ToolExecutionHistoryKey];
-
-        if (toolExecutionHistory is null)
+        if (!state.TryGetValue(ToolExecutionHistoryKey, out var toolExecutionHistory) || toolExecutionHistory is null)
             return [];
 
         var toolExecutionHistoryContent = toolExecutionHistory.ToString();
