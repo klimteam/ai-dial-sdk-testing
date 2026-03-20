@@ -2,15 +2,9 @@ using AiDialSdk.Api.OpenAi.Data;
 
 namespace AiDialSdk.Testing.Models;
 
-public class ToolExecution
+public class ToolExecution(ToolCall call, ToolMessage result)
 {
-    public ToolExecution(ToolCall call, ToolMessage result)
-    {
-        Call = call;
-        Result = result;
-    }
+    public ToolCall Call { get; } = call;
 
-    public ToolCall Call { get; }
-    
-    public ToolMessage Result { get; }
+    public ToolMessage Result { get; } = result;
 }
