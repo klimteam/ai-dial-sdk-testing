@@ -16,7 +16,7 @@ public class OneMessageTestStrategy : ITestStrategy
 
     public async Task<TestResult> RunAsync(IDialChatApiClient chatClient, CancellationToken token)
     {
-        var chatHistory = new List<BaseMessage> { new UserMessage(_message) };
+        var chatHistory = new List<BaseMessage> { new DialUserMessage(_message) };
         var chatResponse = await chatClient.CompleteChatAsync(chatHistory, new DialChatOptions(), token);
         
         chatHistory.Add(chatResponse.Message);
