@@ -6,7 +6,7 @@
         <Nullable>enable</Nullable>
         
         <PackageId>AiDialSdk.Testing.NUnit</PackageId>
-        <Version>0.0.1-alpha.3</Version>
+        <Version>0.0.1-alpha.4</Version>
         <Authors>KlimTeam</Authors>
         <Description>Testing utilities for DIAL platform</Description>
         <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
