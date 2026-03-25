@@ -6,38 +6,34 @@ namespace AiDialSdk.Testing.NUnit.Extensions;
 
 public static class DialAssistantMessageExtensions
 {
-    public static void AssertQuickAppWasCalled(this DialAssistantMessage dialAssistantMessage, string quickAppName)
+    public static void AssertToolWasCalled(this DialAssistantMessage dialAssistantMessage, string toolName)
     {
-        Assert.That(dialAssistantMessage.QuickAppWasCalled(quickAppName), Is.True, $"Expected quick app `{quickAppName}` to be called.");
+        Assert.That(dialAssistantMessage.ToolWasCalled(toolName), Is.True, $"Expected tool `{toolName}` to be called.");
     }
 
-    public static void AssertToolWasCalledByQuickApp(this DialAssistantMessage assistantMessage, string quickAppName, string toolName)
+    public static void AssertToolWasCalled(this DialAssistantMessage assistantMessage, string callingToolName, string calledToolName)
     {
-        var toolCalled = assistantMessage
-            .QuickAppMessages(quickAppName)
-            .OfType<DialAssistantMessage>()
-            .Any(m => m.ToolCalls is not null && m.ToolCalls.WhereName(toolName).Any());
-        
-        Assert.That(toolCalled, Is.True, $"Expected tool `{toolName}` to be called by quick app `{quickAppName}`.");
+        var toolCalled = assistantMessage.ToolWasCalled(callingToolName, calledToolName);
+        Assert.That(toolCalled, Is.True, $"Expected tool `{calledToolName}` to be called by tool `{callingToolName}`.");
     }
     
-    public static void AssertQuickAppWasCalledOnce(this DialAssistantMessage dialAssistantMessage, string quickAppName)
+    public static void AssertToolWasCalledOnce(this DialAssistantMessage dialAssistantMessage, string toolName)
     {
-        var quickAppExecutionHistory = dialAssistantMessage.GetToolExecutionHistory();
-        var quickAppCallCount = quickAppExecutionHistory
+        var toolExecutionHistory = dialAssistantMessage.GetToolExecutionHistory();
+        var toolCallCount = toolExecutionHistory
             .OfType<DialAssistantMessage>()
             .SelectMany(am => am.ToolCalls ?? [])
-            .WhereName(quickAppName)
+            .WhereName(toolName)
             .Count();
         
-        Assert.That(quickAppCallCount, Is.EqualTo(1), $"Expected quick app `{quickAppName}` to be called once, but it was called {quickAppCallCount} times.");
+        Assert.That(toolCallCount, Is.EqualTo(1), $"Expected tool `{toolName}` to be called once, but it was called {toolCallCount} times.");
     }
     
-    public static void AssertOnlySpecifiedQuickAppWasCalled(this DialAssistantMessage dialAssistantMessage, string quickAppName)
+    public static void AssertOnlySpecifiedToolWasCalled(this DialAssistantMessage dialAssistantMessage, string toolName)
     {
-        var calledQuickApps = dialAssistantMessage.GetCalledQuickAppHistoryNames().ToArray();
+        var calledToolNames = dialAssistantMessage.GetCalledDistinctToolNames().ToArray();
         
-        Assert.That(calledQuickApps.Count, Is.EqualTo(1), $"Expected only one quick app to be called, but found {calledQuickApps.Count()}: {string.Join(", ", calledQuickApps)}.");
-        Assert.That(calledQuickApps.First(), Is.EqualTo(quickAppName), $"Expected the only called quick app to be `{quickAppName}`, but it was `{calledQuickApps.First()}`.");
+        Assert.That(calledToolNames.Count, Is.EqualTo(1), $"Expected only one tool name to be called, but found {calledToolNames.Count()}: {string.Join(", ", calledToolNames)}.");
+        Assert.That(calledToolNames.First(), Is.EqualTo(toolName), $"Expected the only called tool name to be `{toolName}`, but it was `{calledToolNames.First()}`.");
     }
 }

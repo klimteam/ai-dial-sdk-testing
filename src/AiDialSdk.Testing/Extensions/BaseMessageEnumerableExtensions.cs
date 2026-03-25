@@ -1,136 +1,91 @@
 using AiDialSdk.Api.Data;
 using AiDialSdk.Api.OpenAi.Data;
-using AiDialSdk.Testing.Helpers;
 using AiDialSdk.Testing.Models;
 
 namespace AiDialSdk.Testing.Extensions;
 
 public static class BaseMessageEnumerableExtensions
 {
-    public static bool ContainsMessageOfType<T>(this IEnumerable<BaseMessage> messages) where T : BaseMessage
+    extension(IEnumerable<BaseMessage> messages)
     {
-        return messages.OfType<T>().Any();
-    }
-    
-    public static DialToolMessage FirstToolMessage(this IEnumerable<BaseMessage> messages)
-    {
-        var firstDialToolMessage = messages.OfType<DialToolMessage>().FirstOrDefault();
-        return firstDialToolMessage ?? throw new InvalidOperationException("No DialToolMessage found in the messages.");
-    }
-    
-    public static DialAssistantMessage LastAssistantMessage(this IEnumerable<BaseMessage> messages)
-    {
-        var lastDialAssistantMessage = messages.OfType<DialAssistantMessage>().LastOrDefault();
-        return lastDialAssistantMessage ?? throw new InvalidOperationException("No DialAssistantMessage found in the messages.");
-    }
-    
-    public static bool QuickAppWasCalled(this IEnumerable<BaseMessage> messages, string quickAppName)
-    {
-        return messages.QuickAppMessages(quickAppName).Any();
-    }
-    
-    public static bool ToolWasCalled(this IEnumerable<BaseMessage> messages, string toolName)
-    {
-        return messages
-            .OfType<DialAssistantMessage>()
-            .SelectMany(am => am.ToolCalls ?? [])
-            .WhereName(toolName)
-            .Any();
-    }
-
-    public static IEnumerable<string> GetCalledToolNames(this IEnumerable<BaseMessage> messages)
-    {
-        return messages
-            .OfType<DialAssistantMessage>()
-            .SelectMany(am => am.ToolCalls ?? [])
-            .Select(tc => ToolHelpers.SanitizeToolName(tc.Function.Name));
-    }
-    
-    public static IEnumerable<BaseMessage> FlattenExecutionHistory
-        (this IEnumerable<BaseMessage> messages)
-    {
-        return messages.SelectMany(message => message.FlattenExecutionHistory());
-    }
-
-    public static IEnumerable<BaseMessage> FlattenExecutionHistory(this BaseMessage message)
-    {
-        switch (message)
+        public bool ContainsMessageOfType<T>() where T : BaseMessage
         {
-            case DialAssistantMessage assistantMessage:
-            {
-                var toolExecutionHistory = assistantMessage.GetToolExecutionHistory();
-                foreach (var toolExecutionHistoryMessage in toolExecutionHistory)
-                {
-                    foreach (var innerToolExecutionHistoryMessage in toolExecutionHistoryMessage.FlattenExecutionHistory())
-                    {
-                        yield return innerToolExecutionHistoryMessage;
-                    }
-                }
-
-                yield return assistantMessage;
-            }
-                break;
-            case DialToolMessage toolMessage:
-            {
-                var toolExecutionHistory = toolMessage.GetToolExecutionHistory();
-                foreach (var toolExecutionHistoryMessage in toolExecutionHistory)
-                {
-                    foreach (var innerToolExecutionHistoryMessage in toolExecutionHistoryMessage.FlattenExecutionHistory())
-                    {
-                        yield return innerToolExecutionHistoryMessage;
-                    }
-                }
-                    
-                yield return toolMessage;
-            } 
-                break;
-            default:
-                yield return message;
-                break;
+            return messages.OfType<T>().Any();
         }
-    }
-    
-    public static IEnumerable<BaseMessage> QuickAppMessages(this IEnumerable<BaseMessage> messages, string quickAppName)
-    {
-        return messages
-            .OfType<DialAssistantMessage>()
-            .SelectMany(dialAssistantMessage => dialAssistantMessage.QuickAppMessages(quickAppName));
-    }
-    
-    public static IEnumerable<string> GetCalledQuickAppHistoryNames(this IEnumerable<BaseMessage> messages)
-    {
-        return messages
-            .OfType<DialAssistantMessage>()
-            .SelectMany(dam => dam.GetCalledQuickAppHistoryNames());
-    }
-    
-    public static IEnumerable<string> GetCalledQuickAppNames(this IEnumerable<BaseMessage> messages)
-    {
-        return messages
-            .OfType<DialAssistantMessage>()
-            .SelectMany(dam => dam.GetCalledQuickAppHistoryNames())
-            .Distinct(StringComparer.OrdinalIgnoreCase);
-    }
-    
-    public static IEnumerable<ToolExecution> ToolExecutions(this IEnumerable<BaseMessage> messages)
-    {
-        var toolCalls = new Dictionary<string, ToolCall>();
-        foreach (var message in messages)
+        
+        public DialToolMessage FirstToolMessage()
         {
-            switch (message)
+            var firstDialToolMessage = messages.OfType<DialToolMessage>().FirstOrDefault();
+            return firstDialToolMessage ?? throw new InvalidOperationException("No DialToolMessage found in the messages.");
+        }
+        
+        public DialAssistantMessage LastAssistantMessage()
+        {
+            var lastDialAssistantMessage = messages.OfType<DialAssistantMessage>().LastOrDefault();
+            return lastDialAssistantMessage ?? throw new InvalidOperationException("No DialAssistantMessage found in the messages.");
+        }
+        
+        public bool ToolWasCalled(string toolName)
+        {
+            return messages
+                .OfType<DialAssistantMessage>()
+                .Any(dam => dam.ToolWasCalled(toolName));
+        }
+        
+        public bool ToolWasCalled(string callingToolName, string calledToolName)
+        {
+            return messages
+                .OfType<DialAssistantMessage>()
+                .Any(dam => dam.ToolWasCalled(callingToolName, calledToolName));
+        }
+        
+        public IEnumerable<BaseMessage> GetToolExecutionHistoryMessages(string toolName)
+        {
+            return messages
+                .OfType<DialAssistantMessage>()
+                .SelectMany(dialAssistantMessage => dialAssistantMessage.GetToolExecutionHistoryMessages(toolName));
+        }
+        
+        public IEnumerable<string> GetCalledToolNames()
+        {
+            return messages
+                .OfType<DialAssistantMessage>()
+                .SelectMany(dam => dam.GetCalledToolNames());
+        }
+    
+        public IEnumerable<string> GetCalledDistinctToolNames()
+        {
+            return messages
+                .OfType<DialAssistantMessage>()
+                .SelectMany(dam => dam.GetCalledToolNames())
+                .Distinct(StringComparer.OrdinalIgnoreCase);
+        }
+        
+        public IEnumerable<BaseMessage> FlattenExecutionHistory()
+        {
+            return messages.SelectMany(message => message.FlattenExecutionHistory());
+        }
+        
+        public IEnumerable<ToolExecution> ToolExecutions()
+        {
+            var toolCalls = new Dictionary<string, ToolCall>();
+            foreach (var message in messages)
             {
-                case DialAssistantMessage { ToolCalls: not null } assistantMessage:
+                switch (message)
                 {
-                    foreach (var toolCall in assistantMessage.ToolCalls)
+                    case DialAssistantMessage { ToolCalls: not null } assistantMessage:
                     {
-                        toolCalls[toolCall.Id] = toolCall;
-                    }
+                        foreach (var toolCall in assistantMessage.ToolCalls)
+                        {
+                            toolCalls[toolCall.Id] = toolCall;
+                        }
 
-                    break;
+                        break;
+                    }
+                    case DialToolMessage toolMessage when toolCalls.TryGetValue(toolMessage.ToolCallId, out var toolCall):
+                        yield return new ToolExecution(toolCall, toolMessage);
+                        break;
                 }
-                case DialToolMessage toolMessage when toolCalls.TryGetValue(toolMessage.ToolCallId, out var toolCall):
-                    yield return new ToolExecution(toolCall, toolMessage);
-                    break;
             }
         }
     }

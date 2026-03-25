@@ -9,6 +9,12 @@ public static class DialStateExtensions
 {
     private const string ToolExecutionHistoryKey = "tool_execution_history";
     
+    public static bool HasToolExecutionHistory(this DialState state)
+    {
+        return state.TryGetValue(ToolExecutionHistoryKey, out var toolExecutionHistory)
+               && toolExecutionHistory?.ToString() is not null;
+    }
+    
     public static IReadOnlyList<BaseMessage> GetToolExecutionHistory(this DialState state)
     {
         if (!state.TryGetValue(ToolExecutionHistoryKey, out var toolExecutionHistory) || toolExecutionHistory is null)

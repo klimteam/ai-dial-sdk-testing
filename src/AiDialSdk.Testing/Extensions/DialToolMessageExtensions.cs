@@ -5,7 +5,7 @@ namespace AiDialSdk.Testing.Extensions;
 
 public static class DialToolMessageExtensions
 {
-    public static IReadOnlyList<BaseMessage> GetQuickAppExecutionHistory(this DialToolMessage toolMessage)
+    public static IReadOnlyList<BaseMessage> GetToolExecutionHistory(this DialToolMessage toolMessage)
     {
         return toolMessage.CustomContent?.State is null 
             ? [] 
