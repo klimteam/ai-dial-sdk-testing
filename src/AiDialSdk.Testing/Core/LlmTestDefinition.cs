@@ -23,16 +23,20 @@ public class LlmTestDefinition
     public async Task<TestResult> RunAsync(CancellationToken token = default)
     {
         var webApplications = BuildWebApplicationFactories();
-        await StartWebApplicationsAsync(webApplications);
-        
-        var testStrategyResult = await _testStrategy.RunAsync(_chatClient, token);
-        
-        foreach (var webApplicationFactory in webApplications)
+        try
         {
-            webApplicationFactory.Dispose();
+            await StartWebApplicationsAsync(webApplications);
+            var testStrategyResult = await _testStrategy.RunAsync(_chatClient, token);
+
+            return testStrategyResult;
         }
-        
-        return testStrategyResult;
+        finally
+        {
+            foreach (var webApplicationFactory in webApplications)
+            {
+                webApplicationFactory.Dispose();
+            }
+        }
     }
     
     private List<IWebApplicationFactory> BuildWebApplicationFactories()
