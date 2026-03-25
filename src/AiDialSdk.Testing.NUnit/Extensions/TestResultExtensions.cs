@@ -27,7 +27,7 @@ public static class TestResultExtensions
             switch (message)
             {
                 case SystemMessage systemMessage:
-                    writer.WriteLine($"[{agentName}] System message: {systemMessage.Content.Trim()}");
+                    writer.WriteLine($"System message [{agentName}]: {systemMessage.Content.Trim()}");
                     break;
                 case DialUserMessage userMessage:
                     writer.WriteLine($"User message: {userMessage.Content.Trim()}");
@@ -36,7 +36,7 @@ public static class TestResultExtensions
                     assistantMessage.GetToolExecutionHistory().WriteTo(writer, agentName);
                 
                     if (!string.IsNullOrWhiteSpace(assistantMessage.Content))
-                        writer.WriteLine($"[{agentName}] Assistant message: {assistantMessage.Content.Trim()}");
+                        writer.WriteLine($"Assistant message [{agentName}]: {assistantMessage.Content.Trim()}");
                     break;
                 case DialToolMessage toolMessage:
                 {
@@ -47,9 +47,9 @@ public static class TestResultExtensions
                     
                     var toolName = ToolHelpers.SanitizeToolName(toolCall.Function.Name);
                     
-                    writer.WriteLine($"[{agentName}] Tool call: '{toolName}' called with arguments: '{toolCall.Function.Arguments}'");
+                    writer.WriteLine($"Tool call [{agentName}]: '{toolName}' called with arguments: '{toolCall.Function.Arguments}'");
                     toolMessage.GetToolExecutionHistory().WriteTo(writer, toolName);
-                    writer.WriteLine($"[{toolName}] Tool message: {toolMessage.Content.Trim()}");
+                    writer.WriteLine($"Tool message [{toolName}]: {toolMessage.Content.Trim()}");
                 }
                     break;
                 default:
