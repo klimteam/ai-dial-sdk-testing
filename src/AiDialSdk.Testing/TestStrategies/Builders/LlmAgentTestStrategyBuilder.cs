@@ -71,7 +71,7 @@ public class LlmAgentTestStrategyBuilder : BaseTestStrategyBuilder<LlmAgentTestS
             return visualizerAttachment is not null;
         }, context =>
         {
-            context.AddMessage(new UserMessage(message));
+            context.AddMessage(new DialUserMessage(message));
             context.AddAgentChatMessage(new ChatMessage(ChatRole.User, llmAgentMockMessage));
             context.AddAgentChatMessage(new ChatMessage(ChatRole.Assistant, message));
         }));
