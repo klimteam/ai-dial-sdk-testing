@@ -26,6 +26,11 @@ public class LlmTestDefinition
         try
         {
             await StartWebApplicationsAsync(webApplications);
+            
+            // Give the web applications some time to start before running the test strategy.
+            // This is a simple approach and can be improved by implementing a more robust health check mechanism.
+            await Task.Delay(2000, token); 
+            
             var testStrategyResult = await _testStrategy.RunAsync(_chatClient, token);
 
             return testStrategyResult;
