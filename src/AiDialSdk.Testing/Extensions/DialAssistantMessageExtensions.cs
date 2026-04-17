@@ -32,6 +32,15 @@ public static class DialAssistantMessageExtensions
                 .Any(m => m.ToolCalls is not null && m.ToolCalls.WhereName(calledToolName).Any());
         }
         
+        public IEnumerable<BaseMessage> GetToolExecutionHistoryMessages()
+        {
+            var historyMessages = assistantMessage.GetToolExecutionHistory() ?? [];
+            foreach (var historyMessage in historyMessages)
+            {
+                yield return historyMessage;
+            }
+        }
+        
         public IEnumerable<BaseMessage> GetToolExecutionHistoryMessages(string toolName)
         {
             var historyMessages = assistantMessage.GetToolExecutionHistory() ?? [];

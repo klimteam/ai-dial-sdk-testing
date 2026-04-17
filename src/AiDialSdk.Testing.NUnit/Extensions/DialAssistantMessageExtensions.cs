@@ -17,6 +17,11 @@ public static class DialAssistantMessageExtensions
         Assert.That(toolCalled, Is.True, $"Expected tool `{calledToolName}` to be called by tool `{callingToolName}`.");
     }
     
+    public static void AssertToolWasNotCalled(this DialAssistantMessage dialAssistantMessage, string toolName)
+    {
+        Assert.That(dialAssistantMessage.ToolWasCalled(toolName), Is.False, $"Expected tool `{toolName}` to not be called.");
+    }
+    
     public static void AssertToolWasCalledOnce(this DialAssistantMessage dialAssistantMessage, string toolName)
     {
         var toolExecutionHistory = dialAssistantMessage.GetToolExecutionHistory();

@@ -39,6 +39,13 @@ public static class BaseMessageEnumerableExtensions
                 .Any(dam => dam.ToolWasCalled(callingToolName, calledToolName));
         }
         
+        public IEnumerable<BaseMessage> GetToolExecutionHistoryMessages()
+        {
+            return messages
+                .OfType<DialAssistantMessage>()
+                .SelectMany(dialAssistantMessage => dialAssistantMessage.GetToolExecutionHistoryMessages());
+        }
+        
         public IEnumerable<BaseMessage> GetToolExecutionHistoryMessages(string toolName)
         {
             return messages

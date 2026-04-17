@@ -1,4 +1,4 @@
-using AiDialSdk.Api.OpenAi.Data;
+using AiDialSdk.Api.Data;
 using AiDialSdk.Testing.Core;
 using AiDialSdk.Testing.Extensions;
 using AiDialSdk.Testing.TestStrategies.Implementations;
@@ -52,6 +52,17 @@ public class LlmAgentTestStrategyBuilder : BaseTestStrategyBuilder<LlmAgentTestS
     public LlmAgentTestStrategyBuilder WithMaxIterations(int maxIterations)
     {
         _maxIterations = maxIterations;
+        return this;
+    }
+    
+    public LlmAgentTestStrategyBuilder CompletedWithToolCall(string toolName)
+    {
+        CompletionConditions.Add(
+            new CompletionCondition(
+                context => context
+                    .LastDialAssistantMessageOrDefault()?
+                    .ToolWasCalled(toolName) ?? false, 
+                $"Tool '{toolName}' was called in the last assistant message"));
         return this;
     }
     
