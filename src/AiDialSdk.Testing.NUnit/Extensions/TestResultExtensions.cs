@@ -15,6 +15,7 @@ public static class TestResultExtensions
             writer.WriteLine($"Complete reason: {completeReason}");
         }
         
+        writer.WriteLine($"Total message count: {testResult.Messages.Count}");
         writer.WriteLine("Conversation History:");
         
         testResult.Messages.WriteTo(writer, agentName);
@@ -46,6 +47,9 @@ public static class TestResultExtensions
                         .Single();
                     
                     var toolName = ToolHelpers.SanitizeToolName(toolCall.Function.Name);
+                    
+                    if (Constants.QuickApps.SystemToolNames.Contains(toolName, StringComparer.OrdinalIgnoreCase))
+                        continue;
                     
                     writer.WriteLine($"Tool call [{agentName}]: '{toolName}' called with arguments: '{toolCall.Function.Arguments}'");
                     toolMessage.GetToolExecutionHistory().WriteTo(writer, toolName);
