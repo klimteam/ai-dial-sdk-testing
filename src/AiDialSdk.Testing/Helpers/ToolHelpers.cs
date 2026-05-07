@@ -4,6 +4,7 @@ public static class ToolHelpers
 {
     public static string SanitizeToolName(string toolName)
     {
-        return toolName.Trim()[..(toolName.Length - 5)].ToLowerInvariant();
+        return toolName.ToLower();
+        //return toolName.Trim()[..(toolName.Length - 5)].ToLowerInvariant();
     }
 }

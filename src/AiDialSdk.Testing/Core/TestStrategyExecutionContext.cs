@@ -1,3 +1,5 @@
+using AiDialSdk.Api.Chat;
+using AiDialSdk.Api.Files;
 using AiDialSdk.Api.OpenAi.Data;
 
 namespace AiDialSdk.Testing.Core;
@@ -6,13 +8,20 @@ public class TestStrategyExecutionContext
 {
     private readonly List<BaseMessage> _messages = [];
     private readonly List<string> _completeReasons = [];
-    private readonly List<ChatAction> _chatActionsHistory = [];
     
     private Usage? _dialUsage;
+
+    public TestStrategyExecutionContext(IDialChatApiClient chatClient, IDialFileApiClient fileClient)
+    {
+        ChatClient = chatClient;
+        FileClient = fileClient;
+    }
+    
+    public IDialChatApiClient ChatClient { get; }
+    
+    public IDialFileApiClient FileClient { get; }
     
     public IReadOnlyList<BaseMessage> Messages => _messages;
-
-    public IReadOnlyList<ChatAction> ChatActionsHistory => _chatActionsHistory;
     
     public IReadOnlyList<string> CompleteReasons => _completeReasons;
 
@@ -29,11 +38,6 @@ public class TestStrategyExecutionContext
     {
         IsComplete = true;
         _completeReasons.Add(reason);
-    }
-    
-    internal void AddChatAction(ChatAction chatAction)
-    {
-        _chatActionsHistory.Add(chatAction);
     }
     
     internal void AddDialUsage(Usage dialUsage)

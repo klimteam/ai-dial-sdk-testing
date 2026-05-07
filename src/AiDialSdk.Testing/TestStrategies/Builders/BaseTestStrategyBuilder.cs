@@ -6,7 +6,7 @@ namespace AiDialSdk.Testing.TestStrategies.Builders;
 public abstract class BaseTestStrategyBuilder<TContext> where TContext : TestStrategyExecutionContext
 {
     protected readonly List<CompletionCondition> CompletionConditions = [];
-    protected readonly List<ChatActionCondition<LlmAgentTestStrategyExecutionContext>> ChatActionConditions = [];
+    protected readonly List<ChatAction<LlmAgentTestStrategyExecutionContext>> ChatActionConditions = [];
     
     protected void WithToolCallByToolCompletionInternal(string callingToolName, string calledToolName)
     {

@@ -30,7 +30,7 @@
     </ItemGroup>
     
     <ItemGroup>
-        <PackageReference Include="AiDialSdk.Api" Version="0.0.1-alpha.2" />
+        <PackageReference Include="AiDialSdk.Api" Version="0.0.1-alpha.3" />
         <PackageReference Include="Azure.AI.OpenAI" Version="2.8.0-beta.1" />
         <PackageReference Include="Microsoft.AspNetCore.Mvc.Testing" Version="10.0.3" />
         <PackageReference Include="Microsoft.Extensions.AI.OpenAI" Version="10.3.0" />

@@ -1,5 +1,6 @@
 using AiDialSdk.Api.Chat;
 using AiDialSdk.Api.Data;
+using AiDialSdk.Api.Files;
 using AiDialSdk.Api.OpenAi.Data;
 using AiDialSdk.Testing.TestStrategies.Models;
 
@@ -14,7 +15,7 @@ public class MessageSequenceTestStrategy : ITestStrategy
         _chatHistory = messages;
     }
     
-    public async Task<TestResult> RunAsync(IDialChatApiClient chatClient, CancellationToken token)
+    public async Task<TestResult> RunAsync(IDialChatApiClient chatClient, IDialFileApiClient _, CancellationToken token)
     {
         var chatHistory = new List<BaseMessage>(_chatHistory);
         var chatResponse = await chatClient.CompleteChatAsync(chatHistory, new DialChatOptions(), token);

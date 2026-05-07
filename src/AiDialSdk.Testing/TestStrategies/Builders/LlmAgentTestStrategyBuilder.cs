@@ -1,20 +1,27 @@
-using AiDialSdk.Api.Data;
+using System.Text;
+using AiDialSdk.Api.Files.Extensions;
 using AiDialSdk.Testing.Core;
 using AiDialSdk.Testing.Extensions;
 using AiDialSdk.Testing.TestStrategies.Implementations;
-using Microsoft.Extensions.AI;
 using Microsoft.Extensions.Configuration;
 
 namespace AiDialSdk.Testing.TestStrategies.Builders;
 
 public class LlmAgentTestStrategyBuilder : BaseTestStrategyBuilder<LlmAgentTestStrategyExecutionContext>
 {
+    private const string LlmAgentTestStrategyConfigurationKey = "LlmAgentTestStrategyConfiguration";
+    
+    private const string EndpointConfigurationKey = $"{LlmAgentTestStrategyConfigurationKey}:Endpoint";
+    private const string ModelNameKey = $"{LlmAgentTestStrategyConfigurationKey}:ModelName";
+    private const string ApiKeyConfigurationKey = $"{LlmAgentTestStrategyConfigurationKey}:ApiKey";
+    
     private readonly IConfiguration _configuration;
     
     private string? _prompt;
     private string? _endpoint;
     private string? _modelName;
     private string? _apiKey;
+    
     private int _maxIterations = 5;
 
     public LlmAgentTestStrategyBuilder(IConfiguration configuration)
@@ -31,6 +38,43 @@ public class LlmAgentTestStrategyBuilder : BaseTestStrategyBuilder<LlmAgentTestS
     public LlmAgentTestStrategyBuilder WithEndpoint(string uri)
     {
         _endpoint = uri;
+        return this;
+    }
+
+    public LlmAgentTestStrategyBuilder WithAttachmentToContentPropagation(string mimeType)
+    {
+        ChatActionConditions.Add(new ChatAction<LlmAgentTestStrategyExecutionContext>(context =>
+        {
+            var lastAssistantMessage = context.LastDialAssistantMessageOrDefault();
+            var visualizerAttachment = lastAssistantMessage?.CustomContent?.Attachments?.FirstOrDefault(a => 
+                a.Type is not null && a.Type.Equals(mimeType, StringComparison.OrdinalIgnoreCase));
+            return visualizerAttachment is not null && !string.IsNullOrWhiteSpace(visualizerAttachment.Url);
+        }, async (context, ct) =>
+        {
+            var lastAssistantMessage = context.LastDialAssistantMessageOrDefault();
+            
+            if (lastAssistantMessage is null)
+                throw new InvalidOperationException("No assistant message found in context.");
+            
+            var visualizerAttachment = lastAssistantMessage.CustomContent?.Attachments?.FirstOrDefault(a => 
+                a.Type is not null && a.Type.Equals(mimeType, StringComparison.OrdinalIgnoreCase));
+            
+            if (visualizerAttachment is null)
+                throw new InvalidOperationException("No visualizer attachment found in context.");
+
+            if (string.IsNullOrWhiteSpace(visualizerAttachment.Url))
+                throw new InvalidOperationException("Visualizer attachment does not have a URL.");
+            
+            var attachmentContent = await context.FileClient.GetDataAsStringAsync(visualizerAttachment.Url, ct);
+
+            var content = new StringBuilder();
+            content.AppendLine("--- Attachment Content Start ---");
+            content.AppendLine(attachmentContent);
+            content.AppendLine("--- Attachment Content End ---");
+
+            return new AppendMessageContentChatActionResult(content.ToString());
+        }));
+        
         return this;
     }
     
@@ -72,20 +116,15 @@ public class LlmAgentTestStrategyBuilder : BaseTestStrategyBuilder<LlmAgentTestS
         return this;
     }
     
-    public LlmAgentTestStrategyBuilder WithMessageAfterVisualizer(string visualizerName, string message, string llmAgentMockMessage)
+    public LlmAgentTestStrategyBuilder WithMessageAfterVisualizer(string visualizerName, string message)
     {
-        ChatActionConditions.Add(new ChatActionCondition<LlmAgentTestStrategyExecutionContext>(context =>
+        ChatActionConditions.Add(new ChatAction<LlmAgentTestStrategyExecutionContext>(context =>
         {
             var lastAssistantMessage = context.LastDialAssistantMessageOrDefault();
             var visualizerAttachment = lastAssistantMessage?.CustomContent?.Attachments?.FirstOrDefault(a => 
                 a.Type is not null && a.Type.Equals(visualizerName, StringComparison.OrdinalIgnoreCase));
             return visualizerAttachment is not null;
-        }, context =>
-        {
-            context.AddMessage(new DialUserMessage(message));
-            context.AddAgentChatMessage(new ChatMessage(ChatRole.User, llmAgentMockMessage));
-            context.AddAgentChatMessage(new ChatMessage(ChatRole.Assistant, message));
-        }));
+        }, (_, _) => Task.FromResult<ChatActionResult>(new MockMessageChatActionResult(message))));
         
         return this;
     }
@@ -95,13 +134,10 @@ public class LlmAgentTestStrategyBuilder : BaseTestStrategyBuilder<LlmAgentTestS
         if (string.IsNullOrWhiteSpace(_prompt))
             throw new InvalidOperationException("Prompt is not set.");
         
-        if (string.IsNullOrWhiteSpace(_modelName))
-            throw new InvalidOperationException("ModelName is not set.");
-        
         return new LlmAgentTestStrategy(
             _prompt, 
             new Uri(GetEndpoint()), 
-            _modelName, 
+            GetModelName(), 
             GetApiKey(), 
             _maxIterations, 
             CompletionConditions, 
@@ -110,15 +146,22 @@ public class LlmAgentTestStrategyBuilder : BaseTestStrategyBuilder<LlmAgentTestS
     
     private string GetEndpoint()
     {
-        var endpoint = _configuration.GetValue<string>(LlmTestDefinitionBuilder.EndpointConfigurationKey);
+        var endpoint = _configuration.GetValue<string>(EndpointConfigurationKey);
         return endpoint ?? _endpoint ?? throw new InvalidOperationException(
-            $"Endpoint must be provided either through configuration key '{LlmTestDefinitionBuilder.EndpointConfigurationKey}' or constructor parameter.");
+            $"Endpoint must be provided either through configuration key '{EndpointConfigurationKey}' or constructor parameter.");
     }
 
+    private string GetModelName()
+    {
+        var modelName = _configuration.GetValue<string>(ModelNameKey);
+        return modelName ?? _modelName ?? throw new InvalidOperationException(
+            $"Model name must be provided either through configuration key '{ModelNameKey}' or constructor parameter.");
+    }
+    
     private string GetApiKey()
     {
-        var apiKey = _configuration.GetValue<string>(LlmTestDefinitionBuilder.ApiKeyConfigurationKey);
+        var apiKey = _configuration.GetValue<string>(ApiKeyConfigurationKey);
         return apiKey ?? _apiKey ?? throw new InvalidOperationException(
-            $"API key must be provided either through configuration key '{LlmTestDefinitionBuilder.ApiKeyConfigurationKey}' or constructor parameter.");
+            $"API key must be provided either through configuration key '{ApiKeyConfigurationKey}' or constructor parameter.");
     }
 }

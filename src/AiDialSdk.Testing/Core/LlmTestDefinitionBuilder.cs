@@ -1,4 +1,6 @@
 using AiDialSdk.Api.Chat.Implementations;
+using AiDialSdk.Api.Clients.Implementations;
+using AiDialSdk.Api.Files.Implementations;
 using AiDialSdk.Testing.TestStrategies;
 using AiDialSdk.Testing.TestStrategies.Builders;
 using Microsoft.AspNetCore.Hosting;
@@ -72,16 +74,25 @@ public class LlmTestDefinitionBuilder
     
     public LlmTestDefinition Build()
     {
-        var chatClient = BuildChatClient();
+        var httpClient = new HttpClient();
+        
+        var chatClient = BuildChatClient(httpClient);
+        var fileClient = BuildFileClient(httpClient);
         
         return _testStrategy is null 
             ? throw new InvalidOperationException("Test strategy is not configured.") 
-            : new LlmTestDefinition(chatClient, _testStrategy, _webApplicationFactoryBuilders);
+            : new LlmTestDefinition(chatClient, fileClient, _testStrategy, _webApplicationFactoryBuilders);
     }
 
-    private DialChatApiClient BuildChatClient()
+    private DialFileApiClient BuildFileClient(HttpClient httpClient)
     {
-        return new DialChatApiClient(new HttpClient(), new Uri(GetEndpoint()), GetApiKey(), _deploymentName, null);
+        return new DialFileApiClient(httpClient, new Uri(GetEndpoint()), GetApiKey());
+    }
+
+    
+    private DialChatApiClient BuildChatClient(HttpClient httpClient)
+    {
+        return new DialChatApiClient(httpClient, new Uri(GetEndpoint()), GetApiKey(), _deploymentName, null);
     }
     
     private static IConfiguration BuildConfiguration()

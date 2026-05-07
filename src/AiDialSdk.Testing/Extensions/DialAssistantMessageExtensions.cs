@@ -92,7 +92,8 @@ public static class DialAssistantMessageExtensions
             return toolExecutionHistory
                 .OfType<DialAssistantMessage>()
                 .SelectMany(am => am.ToolCalls ?? [])
-                .Select(tc => ToolHelpers.SanitizeToolName(tc.Function.Name));
+                .Select(tc => ToolHelpers.SanitizeToolName(tc.Function.Name))
+                .Where(n => !Constants.QuickApps.SystemToolNames.Contains(n, StringComparer.OrdinalIgnoreCase));
         }
         
         private bool HasToolExecutionHistory() 

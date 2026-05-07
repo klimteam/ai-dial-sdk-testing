@@ -1,4 +1,6 @@
+using System.Text.Json;
 using AiDialSdk.Api.Data;
+using AiDialSdk.Api.Extensions;
 using AiDialSdk.Testing.Extensions;
 using NUnit.Framework;
 
@@ -11,6 +13,18 @@ public static class DialAssistantMessageExtensions
         Assert.That(dialAssistantMessage.ToolWasCalled(toolName), Is.True, $"Expected tool `{toolName}` to be called.");
     }
 
+    public static void AssertToolWasCalledWithValidArgs<TArgs>(this DialAssistantMessage dialAssistantMessage, string toolName, Action<TArgs> assertArgs)
+    {
+        var toolExecutionHistory = dialAssistantMessage.GetToolExecutionHistory();
+        
+        var calledTool = toolExecutionHistory
+            .OfType<DialAssistantMessage>()
+            .SelectMany(am => am.ToolCalls ?? [])
+            .Single(am => am.Function.Name.Equals(toolName, StringComparison.InvariantCultureIgnoreCase));
+
+        assertArgs(calledTool.Function.DeserializeArguments<TArgs>());
+    }
+    
     public static void AssertToolWasCalled(this DialAssistantMessage assistantMessage, string callingToolName, string toolName)
     {
         var toolCalled = assistantMessage.ToolWasCalled(callingToolName, toolName);

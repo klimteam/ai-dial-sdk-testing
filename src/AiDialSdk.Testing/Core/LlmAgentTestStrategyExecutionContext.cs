@@ -1,3 +1,5 @@
+using AiDialSdk.Api.Chat;
+using AiDialSdk.Api.Files;
 using Microsoft.Extensions.AI;
 
 namespace AiDialSdk.Testing.Core;
@@ -6,7 +8,8 @@ public class LlmAgentTestStrategyExecutionContext : TestStrategyExecutionContext
 {
     private readonly List<ChatMessage> _agentChatHistory;
 
-    public LlmAgentTestStrategyExecutionContext(string prompt)
+    public LlmAgentTestStrategyExecutionContext(string prompt, IDialChatApiClient chatClient, 
+        IDialFileApiClient fileClient) : base(chatClient, fileClient)
     {
         _agentChatHistory = [new ChatMessage(ChatRole.System, prompt)];
     }
@@ -16,6 +19,8 @@ public class LlmAgentTestStrategyExecutionContext : TestStrategyExecutionContext
     public UsageDetails? AgentUsage { get; private set; }
     
     public int Iteration { get; internal set; }
+    
+    public bool IsFirstIteration => Iteration == 0;
     
     internal void AddAgentChatMessage(ChatMessage message)
     {
@@ -27,8 +32,11 @@ public class LlmAgentTestStrategyExecutionContext : TestStrategyExecutionContext
         _agentChatHistory.AddRange(messages);
     }
     
-    public void AddAgentUsage(UsageDetails agentUsage)
+    public void AddAgentUsage(UsageDetails? agentUsage)
     {
+        if (agentUsage is null)
+            return;
+        
         if (AgentUsage is null)
         {
             AgentUsage = agentUsage;
