@@ -28,16 +28,16 @@ public static class TestResultExtensions
             switch (message)
             {
                 case SystemMessage systemMessage:
-                    writer.WriteLine($"System message [{agentName}]: {systemMessage.Content.Trim()}");
+                    writer.WriteLine($"[{agentName}][System message]: {systemMessage.Content.Trim()}");
                     break;
                 case DialUserMessage userMessage:
-                    writer.WriteLine($"User message: {userMessage.Content.Trim()}");
+                    writer.WriteLine($"[User][User message]: {userMessage.Content.Trim()}");
                     break;
                 case DialAssistantMessage assistantMessage:
                     assistantMessage.GetToolExecutionHistory().WriteTo(writer, agentName);
                 
                     if (!string.IsNullOrWhiteSpace(assistantMessage.Content))
-                        writer.WriteLine($"Assistant message [{agentName}]: {assistantMessage.Content.Trim()}");
+                        writer.WriteLine($"[{agentName}][Assistant message]: {assistantMessage.Content.Trim()}");
                     break;
                 case DialToolMessage toolMessage:
                 {
@@ -51,9 +51,9 @@ public static class TestResultExtensions
                     if (Constants.QuickApps.SystemToolNames.Contains(toolName, StringComparer.OrdinalIgnoreCase))
                         continue;
                     
-                    writer.WriteLine($"Tool call [{agentName}]: '{toolName}' called with arguments: '{toolCall.Function.Arguments}'");
+                    writer.WriteLine($"[{agentName}][Tool call]: '{toolName}' called with arguments: '{toolCall.Function.Arguments}'");
                     toolMessage.GetToolExecutionHistory().WriteTo(writer, toolName);
-                    writer.WriteLine($"Tool message [{toolName}]: {toolMessage.Content.Trim()}");
+                    writer.WriteLine($"[{toolName}][Tool message]: {toolMessage.Content.Trim()}");
                 }
                     break;
                 default:
