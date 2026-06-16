@@ -7,11 +7,13 @@ public static class Constants
     public static class QuickApps
     {
         private const string ReadSkillToolName = "internal_skills_read_skill";
+        private const string TimeAwarenessCurrentTimestamp = "internal_timeawareness_current_timestamp";
         private const string FileParameterFormattingToolName = "tool-call-file-parameter-formatting";
         
         public static readonly string[] SystemToolNames =
         [
             ReadSkillToolName,
+            TimeAwarenessCurrentTimestamp,
             FileParameterFormattingToolName
         ];
     }
