@@ -9,18 +9,26 @@ namespace AiDialSdk.Testing.TestStrategies.Implementations;
 public class OneMessageTestStrategy : ITestStrategy
 {
     private readonly string _message;
-
-    public OneMessageTestStrategy(string message)
+    private readonly IReadOnlyList<DialAttachment>? _attachments;
+    
+    public OneMessageTestStrategy(string message, IReadOnlyList<DialAttachment>? attachments = null)
     {
         _message = message;
+        _attachments = attachments;
     }
 
     public async Task<TestResult> RunAsync(IDialChatApiClient chatClient, IDialFileApiClient _, CancellationToken token)
     {
-        var chatHistory = new List<BaseMessage> { new DialUserMessage(_message) };
+        UserMessageCustomContent? customContent = null;
+        if (_attachments != null)
+        {
+            customContent = new UserMessageCustomContent(null, _attachments);
+        }
+        var chatHistory = new List<BaseMessage> { new DialUserMessage(_message, customContent: customContent) };
         var chatResponse = await chatClient.CompleteChatAsync(chatHistory, new DialChatOptions(), token);
         
         chatHistory.Add(chatResponse.Message);
+        
         return new TestResult(
             chatHistory,
             ["Completed after one message."], 
