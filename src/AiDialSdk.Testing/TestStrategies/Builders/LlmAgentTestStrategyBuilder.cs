@@ -16,8 +16,10 @@ public class LlmAgentTestStrategyBuilder : BaseTestStrategyBuilder<LlmAgentTestS
     private const string ApiKeyConfigurationKey = $"{LlmAgentTestStrategyConfigurationKey}:ApiKey";
     
     private readonly IConfiguration _configuration;
+    private readonly List<string> _mimeTypesToPropagate = [];
     
     private string? _prompt;
+    private string? _firstMessage;
     private string? _endpoint;
     private string? _modelName;
     private string? _apiKey;
@@ -35,6 +37,12 @@ public class LlmAgentTestStrategyBuilder : BaseTestStrategyBuilder<LlmAgentTestS
         return this;
     }
     
+    public LlmAgentTestStrategyBuilder WithFirstMessage(string firstMessage)
+    {
+        _firstMessage = firstMessage;
+        return this;
+    }
+    
     public LlmAgentTestStrategyBuilder WithEndpoint(string uri)
     {
         _endpoint = uri;
@@ -43,37 +51,69 @@ public class LlmAgentTestStrategyBuilder : BaseTestStrategyBuilder<LlmAgentTestS
 
     public LlmAgentTestStrategyBuilder WithAttachmentToContentPropagation(string mimeType)
     {
-        ChatActionConditions.Add(new ChatAction<LlmAgentTestStrategyExecutionContext>(context =>
-        {
-            var lastAssistantMessage = context.LastDialAssistantMessageOrDefault();
-            var visualizerAttachment = lastAssistantMessage?.CustomContent?.Attachments?.FirstOrDefault(a => 
-                a.Type is not null && a.Type.Equals(mimeType, StringComparison.OrdinalIgnoreCase));
-            return visualizerAttachment is not null && !string.IsNullOrWhiteSpace(visualizerAttachment.Url);
-        }, async (context, ct) =>
-        {
-            var lastAssistantMessage = context.LastDialAssistantMessageOrDefault();
-            
-            if (lastAssistantMessage is null)
-                throw new InvalidOperationException("No assistant message found in context.");
-            
-            var visualizerAttachment = lastAssistantMessage.CustomContent?.Attachments?.FirstOrDefault(a => 
-                a.Type is not null && a.Type.Equals(mimeType, StringComparison.OrdinalIgnoreCase));
-            
-            if (visualizerAttachment is null)
-                throw new InvalidOperationException("No visualizer attachment found in context.");
-
-            if (string.IsNullOrWhiteSpace(visualizerAttachment.Url))
-                throw new InvalidOperationException("Visualizer attachment does not have a URL.");
-            
-            var attachmentContent = await context.FileClient.GetDataAsStringAsync(visualizerAttachment.Url, ct);
-
-            var content = new StringBuilder();
-            content.AppendLine("--- Attachment Content Start ---");
-            content.AppendLine(attachmentContent);
-            content.AppendLine("--- Attachment Content End ---");
-
-            return new AppendMessageContentChatActionResult(content.ToString());
-        }));
+        _mimeTypesToPropagate.Add(mimeType);
+        
+        // ChatActionConditions.Add(new ChatAction<LlmAgentTestStrategyExecutionContext>(context =>
+        // {
+        //     var lastAssistantMessage = context.LastDialAssistantMessageOrDefault();
+        //     var visualizerAttachment = lastAssistantMessage?.CustomContent?.Attachments?.FirstOrDefault(a => 
+        //         a.Type is not null && a.Type.Equals(mimeType, StringComparison.OrdinalIgnoreCase));
+        //     return visualizerAttachment is not null && !string.IsNullOrWhiteSpace(visualizerAttachment.Url);
+        // }, async (context, ct) =>
+        // {
+        //     var lastAssistantMessage = context.LastDialAssistantMessageOrDefault();
+        //     
+        //     if (lastAssistantMessage is null)
+        //         throw new InvalidOperationException("No assistant message found in context.");
+        //     
+        //     var visualizerAttachment = lastAssistantMessage.CustomContent?.Attachments?.FirstOrDefault(a => 
+        //         a.Type is not null && a.Type.Equals(mimeType, StringComparison.OrdinalIgnoreCase));
+        //     
+        //     if (visualizerAttachment is null)
+        //         throw new InvalidOperationException("No visualizer attachment found in context.");
+        //
+        //     if (string.IsNullOrWhiteSpace(visualizerAttachment.Url))
+        //         throw new InvalidOperationException("Visualizer attachment does not have a URL.");
+        //     
+        //     var attachmentContent = await context.FileClient.GetDataAsStringAsync(visualizerAttachment.Url, ct);
+        //
+        //     var content = new StringBuilder();
+        //     content.AppendLine("--- Attachment Content Start ---");
+        //     content.AppendLine(attachmentContent);
+        //     content.AppendLine("--- Attachment Content End ---");
+        //
+        //     return new AppendMessageContentChatActionResult(content.ToString());
+        // }));// ChatActionConditions.Add(new ChatAction<LlmAgentTestStrategyExecutionContext>(context =>
+        // {
+        //     var lastAssistantMessage = context.LastDialAssistantMessageOrDefault();
+        //     var visualizerAttachment = lastAssistantMessage?.CustomContent?.Attachments?.FirstOrDefault(a => 
+        //         a.Type is not null && a.Type.Equals(mimeType, StringComparison.OrdinalIgnoreCase));
+        //     return visualizerAttachment is not null && !string.IsNullOrWhiteSpace(visualizerAttachment.Url);
+        // }, async (context, ct) =>
+        // {
+        //     var lastAssistantMessage = context.LastDialAssistantMessageOrDefault();
+        //     
+        //     if (lastAssistantMessage is null)
+        //         throw new InvalidOperationException("No assistant message found in context.");
+        //     
+        //     var visualizerAttachment = lastAssistantMessage.CustomContent?.Attachments?.FirstOrDefault(a => 
+        //         a.Type is not null && a.Type.Equals(mimeType, StringComparison.OrdinalIgnoreCase));
+        //     
+        //     if (visualizerAttachment is null)
+        //         throw new InvalidOperationException("No visualizer attachment found in context.");
+        //
+        //     if (string.IsNullOrWhiteSpace(visualizerAttachment.Url))
+        //         throw new InvalidOperationException("Visualizer attachment does not have a URL.");
+        //     
+        //     var attachmentContent = await context.FileClient.GetDataAsStringAsync(visualizerAttachment.Url, ct);
+        //
+        //     var content = new StringBuilder();
+        //     content.AppendLine("--- Attachment Content Start ---");
+        //     content.AppendLine(attachmentContent);
+        //     content.AppendLine("--- Attachment Content End ---");
+        //
+        //     return new AppendMessageContentChatActionResult(content.ToString());
+        // }));
         
         return this;
     }
@@ -96,17 +136,6 @@ public class LlmAgentTestStrategyBuilder : BaseTestStrategyBuilder<LlmAgentTestS
     public LlmAgentTestStrategyBuilder WithMaxIterations(int maxIterations)
     {
         _maxIterations = maxIterations;
-        return this;
-    }
-    
-    public LlmAgentTestStrategyBuilder CompletedWithToolCall(string toolName)
-    {
-        CompletionConditions.Add(
-            new CompletionCondition(
-                context => context
-                    .LastDialAssistantMessageOrDefault()?
-                    .ToolWasCalled(toolName) ?? false, 
-                $"Tool '{toolName}' was called in the last assistant message"));
         return this;
     }
     
@@ -136,10 +165,12 @@ public class LlmAgentTestStrategyBuilder : BaseTestStrategyBuilder<LlmAgentTestS
         
         return new LlmAgentTestStrategy(
             _prompt, 
+            _firstMessage,
             new Uri(GetEndpoint()), 
             GetModelName(), 
             GetApiKey(), 
             _maxIterations, 
+            _mimeTypesToPropagate,
             CompletionConditions, 
             ChatActionConditions);
     }

@@ -1,5 +1,4 @@
 using AiDialSdk.Api.Chat.Implementations;
-using AiDialSdk.Api.Clients.Implementations;
 using AiDialSdk.Api.Files.Implementations;
 using AiDialSdk.Testing.TestStrategies;
 using AiDialSdk.Testing.TestStrategies.Builders;

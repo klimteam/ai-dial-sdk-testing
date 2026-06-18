@@ -6,31 +6,24 @@ namespace AiDialSdk.Testing.Core;
 
 public class LlmAgentTestStrategyExecutionContext : TestStrategyExecutionContext
 {
-    private readonly List<ChatMessage> _agentChatHistory;
-
     public LlmAgentTestStrategyExecutionContext(string prompt, IDialChatApiClient chatClient, 
         IDialFileApiClient fileClient) : base(chatClient, fileClient)
     {
-        _agentChatHistory = [new ChatMessage(ChatRole.System, prompt)];
+        SystemMessage = new ChatMessage(ChatRole.System, prompt);
     }
     
-    public IReadOnlyList<ChatMessage> AgentChatHistory => _agentChatHistory;
+    public ChatMessage SystemMessage { get; }
     
     public UsageDetails? AgentUsage { get; private set; }
-    
     public int Iteration { get; internal set; }
     
     public bool IsFirstIteration => Iteration == 0;
     
-    internal void AddAgentChatMessage(ChatMessage message)
-    {
-        _agentChatHistory.Add(message);
-    }
+    public bool? TestCasePassed { get; internal set; }
     
-    internal void AddAgentChatMessages(IList<ChatMessage> messages)
-    {
-        _agentChatHistory.AddRange(messages);
-    }
+    public string? TestCaseExpectedBehavior { get; internal set; }
+    
+    public string? TestCaseActualBehavior { get; internal set; }
     
     public void AddAgentUsage(UsageDetails? agentUsage)
     {

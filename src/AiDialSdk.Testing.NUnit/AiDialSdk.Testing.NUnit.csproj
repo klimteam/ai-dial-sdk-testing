@@ -6,7 +6,7 @@
         <Nullable>enable</Nullable>
         
         <PackageId>AiDialSdk.Testing.NUnit</PackageId>
-        <Version>0.0.1-alpha.8</Version>
+        <Version>0.0.1-alpha.10</Version>
         <Authors>KlimTeam</Authors>
         <Description>Testing utilities for DIAL platform</Description>
         <PackageLicenseExpression>Apache-2.0</PackageLicenseExpression>
@@ -23,6 +23,10 @@
         <PackageProjectUrl>https://github.com/klimteam/ai-dial-sdk-testing</PackageProjectUrl>
         <RepositoryUrl>https://github.com/klimteam/ai-dial-sdk-testing</RepositoryUrl>
         <RepositoryType>git</RepositoryType>
+    </PropertyGroup>
+    
+    <PropertyGroup Condition=" '$(Configuration)' == 'Release' ">
+      <Optimize>false</Optimize>
     </PropertyGroup>
 
     <ItemGroup>

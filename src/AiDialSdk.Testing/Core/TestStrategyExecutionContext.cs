@@ -27,7 +27,7 @@ public class TestStrategyExecutionContext
 
     public Usage? DialUsage => _dialUsage;
 
-    internal void AddMessage(BaseMessage message)
+    internal virtual void AddMessage(BaseMessage message)
     {
         _messages.Add(message);
     }

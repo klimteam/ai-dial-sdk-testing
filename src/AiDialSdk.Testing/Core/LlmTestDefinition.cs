@@ -26,6 +26,12 @@ public class LlmTestDefinition
 
     public async Task<TestResult> RunAsync(CancellationToken token = default)
     {
+        return await RunAsync<TestResult>(token);
+    }
+    
+    public async Task<TTestResult> RunAsync<TTestResult>(CancellationToken token = default)
+        where TTestResult : TestResult
+    {
         var webApplications = BuildWebApplicationFactories();
         try
         {
@@ -35,9 +41,9 @@ public class LlmTestDefinition
             // This is a simple approach and can be improved by implementing a more robust health check mechanism.
             await Task.Delay(2000, token);
             
-            var testStrategyResult = await _testStrategy.RunAsync(_chatClient, _fileClient, token);
-
-            return testStrategyResult;
+            var result = await _testStrategy.RunAsync(_chatClient, _fileClient, token);
+            
+            return result as TTestResult ?? throw new InvalidOperationException($"Test strategy returned a result of type {result.GetType().Name} which cannot be cast to {typeof(TTestResult).Name}");
         }
         finally
         {

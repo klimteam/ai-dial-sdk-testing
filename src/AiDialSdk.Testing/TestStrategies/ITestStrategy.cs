@@ -6,8 +6,5 @@ namespace AiDialSdk.Testing.TestStrategies;
 
 public interface ITestStrategy
 {
-    Task<TestResult> RunAsync(
-        IDialChatApiClient chatClient,
-        IDialFileApiClient fileClient,
-        CancellationToken token);
+    Task<TestResult> RunAsync(IDialChatApiClient chatClient, IDialFileApiClient fileClient, CancellationToken token);
 }
