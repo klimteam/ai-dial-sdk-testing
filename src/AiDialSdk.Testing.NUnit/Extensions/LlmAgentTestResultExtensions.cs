@@ -23,15 +23,15 @@ public static class LlmAgentTestResultExtensions
         }
     }
 
-    public static async Task WriteTestCaseStatusAsync(this LlmAgentTestResult testResult)
+    public static void WriteTestCaseStatusAsync(this LlmAgentTestResult testResult)
     {
         switch (testResult.TestCasePassed)
         {
             case false:
-                await TestContext.Out.WriteLineAsync($"Test case failed {testResult.TestCaseActualBehavior ?? "Not provided"}. Expected behavior: {testResult.TestCaseExpectedBehavior ?? "Not provided"}");
+                TestContext.Out.WriteLine($"Test case failed {testResult.TestCaseActualBehavior ?? "Not provided"}. Expected behavior: {testResult.TestCaseExpectedBehavior ?? "Not provided"}");
                 break;
             case true:
-                await TestContext.Out.WriteLineAsync($"Test case passed.");
+                TestContext.Out.WriteLine($"Test case passed.");
                 break;
         }
     }
