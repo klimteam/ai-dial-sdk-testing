@@ -10,9 +10,9 @@ namespace AiDialSdk.Testing.Core;
 public class LlmTestDefinitionBuilder
 {
     private const string LlmTestDefinitionConfigurationKey = "LlmTestDefinitionConfiguration";
-    
-    internal const string EndpointConfigurationKey = $"{LlmTestDefinitionConfigurationKey}:Endpoint";
-    internal const string ApiKeyConfigurationKey = $"{LlmTestDefinitionConfigurationKey}:ApiKey";
+
+    private const string EndpointConfigurationKey = $"{LlmTestDefinitionConfigurationKey}:Endpoint";
+    private const string ApiKeyConfigurationKey = $"{LlmTestDefinitionConfigurationKey}:ApiKey";
     
     private readonly string _deploymentName;
     private readonly string? _endpoint;
