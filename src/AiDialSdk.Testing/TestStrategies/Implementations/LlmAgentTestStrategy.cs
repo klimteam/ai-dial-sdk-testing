@@ -59,7 +59,7 @@ public class LlmAgentTestStrategy : BaseTestStrategy<LlmAgentTestStrategyExecuti
             {
                 AIFunctionFactory.Create(
                     (string message) => true,
-                    Constants.SendNextMessageToChatToolName, "Use this function to send a next message to the chat of test application."),
+                    Constants.SendNextMessageToChatToolName, "Use this function to send a next message to the chat of test application and continue testing test case."),
                 AIFunctionFactory.Create(
                     () => true,
                     Constants.MarkTestAsSuccessfulToolName,
@@ -164,11 +164,6 @@ public class LlmAgentTestStrategy : BaseTestStrategy<LlmAgentTestStrategyExecuti
                     token);
 
                 ProcessChatMessage(testExecutionContext, agentChatClientResponse);
-                
-                if (!string.IsNullOrWhiteSpace(agentChatClientResponse.Text))
-                {
-                    testExecutionContext.AddMessage(new DialUserMessage(agentChatClientResponse.Text));
-                }
                 
                 break;
         }
@@ -279,16 +274,44 @@ public class LlmAgentTestStrategy : BaseTestStrategy<LlmAgentTestStrategyExecuti
     private async Task<string> BuildTestAgentMessageAsync(LlmAgentTestStrategyExecutionContext testExecutionContext, CancellationToken token)
     {
         var messageBuilder = new StringBuilder();
+        messageBuilder.AppendLine("* Current call history:");
 
-        messageBuilder.AppendLine("Current call history history:");
-        
-        var filteredMessages = FilterInternalMessages(testExecutionContext.Messages).ToArray();
-        messageBuilder.AppendLine(JsonSerializer.Serialize(filteredMessages, GlobalJsonSettings.ChatCompletionRequestJsonSerializerOptions));
+        foreach (var message in testExecutionContext.Messages)
+        {
+            switch (message)
+            {
+                case DialAssistantMessage assistantMessage:
+                    messageBuilder.AppendLine($"Role: [{message.Role}]");
+                    messageBuilder.AppendLine("Content:");
+                    messageBuilder.AppendLine(assistantMessage.Content?.Trim());
+                    messageBuilder.AppendLine();
+                    if (assistantMessage.CustomContent?.Attachments is not null && assistantMessage.CustomContent.Attachments.Count > 0)
+                    {
+                        messageBuilder.AppendLine("* Attachments:");
+                        foreach (var attachment in assistantMessage.CustomContent.Attachments)
+                        {
+                            messageBuilder.AppendLine($"  - Url: {attachment.Url}, Title: {attachment.Title}, Type: {attachment.Type}");
+                        }
+                        messageBuilder.AppendLine();
+                    }
+                    break;
+                case UserMessage userMessage:
+                    messageBuilder.AppendLine($"Role: [{message.Role}]");
+                    messageBuilder.AppendLine("Content:");
+                    messageBuilder.AppendLine(userMessage.Content.Trim());
+                    messageBuilder.AppendLine();
+                    break;
+                default:
+                    break;
+            }
+        }
+        //var filteredMessages = FilterInternalMessages(testExecutionContext.Messages).ToArray();
+        //messageBuilder.AppendLine(JsonSerializer.Serialize(filteredMessages, GlobalJsonSettings.ChatCompletionRequestJsonSerializerOptions));
         
         var attachmentsToPropagate = GetAttachmentsToPropagate(testExecutionContext.Messages, _mimeTypesToPropagate);
         var attachmentContent = await BuildAttachmentContentAsync(testExecutionContext, attachmentsToPropagate, token);
         
-        messageBuilder.AppendLine("Attachments content:");
+        messageBuilder.AppendLine("* Attachments content:");
         messageBuilder.AppendLine(attachmentContent);
         
         return messageBuilder.ToString();
